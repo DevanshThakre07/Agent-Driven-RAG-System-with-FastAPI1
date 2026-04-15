@@ -1,46 +1,52 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi import UploadFile, File
+import os
 
 app = FastAPI()
 
+
+class QueryRequest(BaseModel):
+    question: str
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
 @app.get("/")
 def home():
-    return {"message": "working"}
-# from fastapi import FastAPI
-# from models import QueryRequest
-# from rag_pipeline import answer_query, initialize_vector_store
-# from fastapi import UploadFile, File
-# import os
-# app = FastAPI()
+    return {"message": "RAG API running"}
 
+@app.post("/upload")
+async def upload(file: UploadFile = File(...)):
+    try:
+        from rag_pipeline import initialize_vector_store
+        
+        file_path = os.path.join(UPLOAD_DIR, file.filename)
 
+        with open(file_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
 
-# UPLOAD_DIR = "uploads"
-# os.makedirs(UPLOAD_DIR, exist_ok=True)
+        initialize_vector_store([file_path])
 
-# @app.get("/")
-# def home():
-#     return {"message": "RAG API running"}
+        return {"message": f"{file.filename} uploaded and processed"}
 
-# @app.post("/upload")
-# async def upload(file: UploadFile = File(...)):
-#     file_path = os.path.join(UPLOAD_DIR, file.filename)
+    except Exception as e:
+        return {"error": str(e)}
 
-#     # Save file
-#     with open(file_path, "wb") as f:
-#         content = await file.read()
-#         f.write(content)
+@app.post("/ask")
+def ask(request: QueryRequest):
+    try:
+        from rag_pipeline import answer_query
 
-#     # Initialize vector store with this file
-#     initialize_vector_store([file_path])
+        result = answer_query(request.question)
 
-#     return {"message": f"{file.filename} uploaded and processed"}
+        return {
+            "question": request.question,
+            "answer": result["answer"],
+            "sources": result["sources"]
+        }
 
-# @app.post("/ask")
-# def ask(request: QueryRequest):
-#     result = answer_query(request.question)
-
-#     return {
-#         "question": request.question,
-#         "answer": result["answer"],
-#         "sources": result["sources"]
-#     }
+    except Exception as e:
+        return {"error": str(e)}
