@@ -5,13 +5,19 @@ from langchain_huggingface import HuggingFaceEmbeddings
 import os
 from google import genai 
 
-embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-
-key = os.getenv('GOOGLE_API_KEY')
-client = genai.Client(api_key= key)
 model_id = 'gemini-2.5-flash-lite'
 
+def get_client():
+    key = os.getenv("GOOGLE_API_KEY")
+    if not key:
+        raise ValueError("GOOGLE_API_KEY not set")
+    return genai.Client(api_key=key)
+
+def get_embedding_model():
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
 def initialize_vector_store(file_paths):
     global vector_store
@@ -35,7 +41,7 @@ def initialize_vector_store(file_paths):
 
     chunks = splitter.split_documents(documents)
 
-    vector_store = FAISS.from_documents(chunks, embedding_model)
+    vector_store = FAISS.from_documents(chunks, get_embedding_model())
 
 
 
@@ -71,7 +77,7 @@ def generate_answer(query, context):
     Question:
     {query}
     """
-
+    client = get_client()
     response = client.models.generate_content(
     model=model_id,
     contents=prompt)
@@ -81,7 +87,7 @@ def generate_answer(query, context):
 # MAIN FUNCTION
 def answer_query(query: str):
     global vector_store
-
+    client = get_client()
     #  Step 1: If no document → LLM
     if vector_store is None:
         response = client.models.generate_content(
@@ -94,6 +100,7 @@ def answer_query(query: str):
 
     #  Step 3: If weak retrieval → fallback
     if len(docs) == 0:
+        
         response = client.models.generate_content(
         model=model_id,
         contents=query)
