@@ -38,7 +38,7 @@ def initialize_vector_store(file_paths):
     vector_store = FAISS.from_documents(chunks, embedding_model)
 
 
-# 🔹 CREATE VECTOR STORE ON START
+
 vector_store = None
 
 
