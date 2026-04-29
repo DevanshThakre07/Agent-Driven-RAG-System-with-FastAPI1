@@ -1,6 +1,6 @@
-# Agent-Driven-RAG-System-with-FastAPI1
+# Agent-Driven RAG System with Hybrid Search & Reranking
 
-Deployed FastAPI RAG system with document upload, FAISS-based retrieval, and LLM-powered question answering.
+A production-style **Retrieval-Augmented Generation (RAG)** system built using **FastAPI**, enhanced with **Hybrid Search (FAISS + BM25)** and **Cross-Encoder Reranking** to deliver highly relevant and accurate answers from documents.
 
 A production-style **Retrieval-Augmented Generation (RAG)** system built using **FastAPI**, enabling users to upload documents and perform intelligent question-answering using LLMs.
 
@@ -9,26 +9,31 @@ A production-style **Retrieval-Augmented Generation (RAG)** system built using *
 ## Features
 
 - 📄 Upload PDF documents dynamically
-- 🔍 Semantic search using FAISS
+- 🔍 Hybrid Search (FAISS + BM25)
+- 🧠 Cross-Encoder Reranking for improved relevance
 - 🤖 Context-aware answer generation using LLM (Gemini API)
 - ⚡ FastAPI-based REST API for real-time interaction
-- 🧠 Hybrid system with fallback to direct LLM responses
+- 🔁 Intelligent fallback to direct LLM responses
 - 📚 Source attribution for transparency
 
 ---
 
 ## 🧱 Architecture
 
-User Query
-↓
-FastAPI (/ask, /upload)
-↓
-RAG Pipeline
-↓
-FAISS Vector Store (Embeddings)
-↓
-LLM (Gemini API)
-↓
+User Query  
+↓  
+FastAPI (/ask, /upload)  
+↓  
+Hybrid Retrieval (FAISS + BM25)  
+↓  
+Top-K Candidate Chunks  
+↓  
+Cross-Encoder Reranking  
+↓  
+Filtered Context  
+↓  
+LLM (Gemini API)  
+↓  
 Final Answer + Sources
 
 ---
@@ -81,14 +86,17 @@ Response:
 }
 ```
 
-#How It Works
-1.User uploads a PDF document
-2.Document is split into chunks
-3.Embeddings are generated
-4.Stored in FAISS vector database
-5.User asks a question
-6.Relevant chunks are retrieved
-7.LLM generates context-aware answer
+## How It Works
+
+1. User uploads a PDF document
+2. Document is split into chunks
+3. Embeddings are generated using MiniLM
+4. FAISS performs semantic search
+5. BM25 performs keyword-based retrieval
+6. Results are combined (Hybrid Search)
+7. Cross-encoder reranks the results
+8. Top chunks are passed to LLM
+9. LLM generates context-aware answer
 
 ▶️ Run Locally
 
@@ -101,10 +109,16 @@ Response:
    uvicorn main:app --reload
 
 #Future Improvements
-1.Add authentication system
-2.Improve retrieval using re-ranking
-3.Add support for multiple documents
-4.Implement advanced agent-based routing
+
+- [x] Hybrid search (FAISS + BM25)
+- [x] Cross-encoder reranking
+- [ ] FAISS persistence
+- [ ] LangGraph-based agent workflow
+- [ ] Docker deployment
+
+## 🌐 Live Demo
+
+🔗 API: https://agent-driven-rag-system-with-fastapi1.onrender.com/docs
 
 #Author
 
