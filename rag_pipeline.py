@@ -1,18 +1,13 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-# from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.embeddings import HuggingFaceEmbeddings
-import os
-# from google import genai 
+import os 
 import google.genai as genai
-# change
 from rank_bm25 import BM25Okapi
-# change
 from sentence_transformers import CrossEncoder
 
 model_id = 'gemini-2.5-flash-lite'
-# change
 reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 def get_client():
     key = os.getenv("GOOGLE_API_KEY")
@@ -48,13 +43,11 @@ def initialize_vector_store(file_paths):
     chunks = splitter.split_documents(documents)
 
     vector_store = FAISS.from_documents(chunks, get_embedding_model())
-
-# Change 
-    # 🔹 STORE CHUNKS
+    #  STORE CHUNKS
     global bm25, chunks_list
     chunks_list = chunks
 
-    # 🔹 BM25 SETUP
+    #  BM25 SETUP
     texts = [doc.page_content for doc in chunks]
     tokenized_corpus = [text.split() for text in texts]
 
@@ -62,7 +55,6 @@ def initialize_vector_store(file_paths):
 
 
 vector_store = None
-# change
 bm25 = None
 chunks_list = None
 
@@ -102,7 +94,6 @@ def generate_answer(query, context):
     contents=prompt)
     return response.text
 
-# Change
 def hybrid_search(query, k=5):
     global vector_store, bm25, chunks_list
 
@@ -121,10 +112,10 @@ def hybrid_search(query, k=5):
 
     bm25_docs = [chunks_list[i] for i in top_indices]
 
-    # 🔹 Combine
+    #  Combine
     combined = faiss_docs + bm25_docs
 
-    # 🔹 Remove duplicates
+    #  Remove duplicates
     seen = set()
     unique_docs = []
 
@@ -135,7 +126,7 @@ def hybrid_search(query, k=5):
 
     return unique_docs[:k]
 
-# change
+
 def rerank(query, docs, top_k=3):
     pairs = [(query, doc.page_content) for doc in docs]
 
@@ -167,7 +158,6 @@ def answer_query(query: str):
     # this commented line is the origional
     # docs = vector_store.similarity_search(query, k=5)
 
-    # changed
     docs = hybrid_search(query, k=10)
     docs = rerank(query, docs, top_k=3)
 
