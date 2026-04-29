@@ -108,7 +108,7 @@ Response:
 3. Run FastAPI server
    uvicorn main:app --reload
 
-#Future Improvements
+# Future Improvements
 
 - [x] Hybrid search (FAISS + BM25)
 - [x] Cross-encoder reranking
@@ -120,7 +120,7 @@ Response:
 
 🔗 API: https://agent-driven-rag-system-with-fastapi1.onrender.com/docs
 
-#Author
+# Author
 
 Devansh Thakre
 
